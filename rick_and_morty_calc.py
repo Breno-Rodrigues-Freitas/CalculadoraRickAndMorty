@@ -13,37 +13,37 @@ import random
 import os
 import re
 
-# ---------- Configurações de tema -----------
-BG = "#0f1720"           # fundo escuro
-PANEL = "#071017"        # painel dos botões
-NEON_GREEN = "#7CFC00"   # verde neon
+# ---------- Configurações de tema (MAIS CONTRASTE) -----------
+BG = "#000000"           # fundo preto (maior contraste)
+PANEL = "#1a1a1a"        # painel cinza escuro
+NEON_GREEN = "#00FF00"   # verde neon mais brilhante
 NEON_CYAN = "#00FFFF"    # ciano neon
-ACCENT = "#9B59B6"       # roxo suave
-TEXT = "#E6F9F2"         # texto claro
-BUTTON_BG = "#1a2a3a"    # fundo dos botões
-BUTTON_ACTIVE = "#2a3a4a" # botão ativo
+ACCENT = "#FF00FF"       # magenta (mais visível)
+TEXT = "#FFFFFF"         # texto branco puro
+BUTTON_BG = "#333333"    # fundo dos botões
+BUTTON_ACTIVE = "#555555" # botão ativo
 
-# Frases aleatórias estilo Rick
+# Frases aleatórias estilo Rick (mais curtas para caber)
 RICK_QUOTES = [
     "Wubba Lubba Dub Dub!",
     "Get Schwifty!",
-    "I'm Mr. Meeseeks, look at me!",
-    "Sometimes science is more art than science.",
-    "Existence is pain to a Meeseeks.",
-    "Nobody exists on purpose, nobody belongs anywhere.",
-    "Grasssss... tastes bad!",
-    "Pickle Riiiiick!",
-    "I don't get it, and I don't need to.",
-    "Show me what you got!"
+    "I'm Mr. Meeseeks!",
+    "Science, bitch!",
+    "Pickle Riiick!",
+    "Show me what you got!",
+    "AIDS!",
+    "Grasssss...",
+    "And that's the waaaaay the news goes!",
+    "Hit the sack, Jack!"
 ]
 
 # Frases de erro
 ERROR_QUOTES = [
-    "Uh oh! Somethin' went wrong, Morty!",
-    "This is worse than that time I turned myself into a pickle!",
+    "Uh oh! Erro, Morty!",
+    "W-w-what happened?",
     "Existence is pain!",
-    "W-w-w-what the hell is this?",
-    "I'm not programmed for this, Jerry!"
+    "This is worse than Pickle Rick!",
+    "Calculator broke!"
 ]
 
 # ---------- Avaliador seguro de expressões ----------
@@ -63,16 +63,13 @@ ALLOWED_UNARYOP = {
 }
 
 def safe_eval(expr: str):
-    """
-    Avalia expressões numéricas de forma segura usando ast.
-    Permite números, + - * / ** % e parênteses.
-    """
+    """Avalia expressões numéricas de forma segura usando ast."""
     expr = expr.strip()
     if not expr:
         raise ValueError("Expressão vazia")
 
     # Verificar se a expressão termina com operador
-    if expr[-1] in '+-*/%':
+    if expr and expr[-1] in '+-*/%':
         expr = expr[:-1]
     
     try:
@@ -124,7 +121,10 @@ class RickCalculator(tk.Tk):
         self.title("Rick & Morty Calculator")
         self.configure(bg=BG)
         self.resizable(False, False)
-        self.geometry("380x560")
+        self.geometry("400x600")
+        
+        # Sempre no topo para facilitar visualização
+        self.attributes('-topmost', True)
         
         # Memória e histórico
         self.memory = 0
@@ -137,11 +137,11 @@ class RickCalculator(tk.Tk):
         except Exception:
             pass
 
-        # Fonts
-        self.big_font = font.Font(family="Helvetica", size=28, weight="bold")
-        self.display_font = font.Font(family="Consolas", size=20)
-        self.small_font = font.Font(family="Helvetica", size=10, weight="bold")
-        self.history_font = font.Font(family="Consolas", size=10)
+        # Fonts (MAIORES)
+        self.big_font = font.Font(family="Arial", size=32, weight="bold")
+        self.display_font = font.Font(family="Courier", size=24, weight="bold")
+        self.medium_font = font.Font(family="Arial", size=16, weight="bold")
+        self.small_font = font.Font(family="Arial", size=12, weight="bold")
 
         # Criar interface
         self.create_widgets()
@@ -152,97 +152,123 @@ class RickCalculator(tk.Tk):
     def create_widgets(self):
         """Cria todos os widgets da interface"""
         
-        # Top frame (imagem opcional + frase)
-        top = tk.Frame(self, bg=BG)
-        top.pack(fill="x", pady=(12, 6))
+        # Top frame (frase do Rick)
+        top = tk.Frame(self, bg=BG, height=60)
+        top.pack(fill="x", pady=(10, 5))
+        top.pack_propagate(False)
 
-        # Tenta carregar imagem rick.png (opcional)
-        self.image_label = tk.Label(top, bg=BG)
-        self.image_label.pack()
-        if os.path.exists("rick.png"):
-            try:
-                img = tk.PhotoImage(file="rick.png")
-                img = img.subsample(max(1, img.width()//150), max(1, img.height()//100))
-                self.image_label.configure(image=img)
-                self.image_label.image = img
-            except Exception:
-                self.image_label.configure(text="🧪 Rick's Lab", fg=NEON_CYAN, bg=BG, font=self.big_font)
-
-        # Frase do Rick
+        # Frase do Rick (MAIOR)
         self.quote_var = tk.StringVar(value=random.choice(RICK_QUOTES))
         quote_label = tk.Label(top, textvariable=self.quote_var, bg=BG, fg=NEON_CYAN, 
-                              font=self.small_font, wraplength=350)
-        quote_label.pack(pady=(6,0))
+                              font=self.medium_font, wraplength=380)
+        quote_label.pack(expand=True, fill="both")
 
-        # Display
+        # Display (MAIOR)
         self.display_var = tk.StringVar()
-        display_frame = tk.Frame(self, bg=PANEL, padx=10, pady=10)
-        display_frame.pack(fill="x", padx=12, pady=(8, 12))
+        display_frame = tk.Frame(self, bg=PANEL, padx=15, pady=15)
+        display_frame.pack(fill="x", padx=15, pady=(5, 15))
 
         self.display = tk.Entry(display_frame, textvariable=self.display_var,
-                              font=self.big_font, justify="right", bd=0, bg=PANEL, fg=TEXT,
-                              insertbackground=TEXT, state='readonly')
-        self.display.pack(fill="x")
+                              font=self.big_font, justify="right", bd=3, 
+                              bg="#222222", fg=NEON_GREEN,
+                              insertbackground=NEON_GREEN, relief="sunken")
+        self.display.pack(fill="x", ipady=10)
         self.display_var.set("0")
 
         # Botões
         btn_frame = tk.Frame(self, bg=BG)
-        btn_frame.pack(padx=12, pady=(0,12))
+        btn_frame.pack(padx=15, pady=(0, 10), expand=True, fill="both")
 
         buttons = [
             ['MC', 'MR', 'M+', 'M-'],
-            ['C', '⌫', '%', '/'],
-            ['7', '8', '9', '*'],
+            ['C', '←', '%', '/'],
+            ['7', '8', '9', '×'],
             ['4', '5', '6', '-'],
             ['1', '2', '3', '+'],
-            ['+/-', '0', '.', '=']
+            ['+/-', '0', '.', '=']  # '=' está aqui!
         ]
+
+        # Mapeamento de caracteres para operações
+        self.op_map = {
+            '×': '*',
+            '÷': '/',
+            '←': '⌫'
+        }
 
         for r, row in enumerate(buttons):
             row_frame = tk.Frame(btn_frame, bg=BG)
-            row_frame.pack(fill="x", pady=3)
+            row_frame.pack(fill="both", expand=True, pady=3)
+            
             for c, char in enumerate(row):
-                btn = tk.Button(row_frame, text=char, 
-                              command=lambda ch=char: self.on_button(ch),
-                              font=self.display_font if char not in ['MC', 'MR', 'M+', 'M-'] else self.small_font,
-                              bd=0, relief="raised", cursor="hand2",
-                              padx=8, pady=8, width=5)
+                # Determinar o comando real
+                cmd = self.op_map.get(char, char)
                 
-                # Estilo por tipo
-                if char in "0123456789.":
-                    btn.configure(bg="#071e12", fg=NEON_GREEN, 
-                                activebackground="#0b341f", activeforeground=NEON_GREEN)
-                elif char in "+-*/%":
-                    btn.configure(bg="#08202a", fg=NEON_CYAN, 
-                                activebackground="#08333b", activeforeground=NEON_CYAN)
-                elif char in ['=', 'C', '⌫', '+/-']:
-                    btn.configure(bg=ACCENT, fg=TEXT, 
-                                activebackground="#6f3f9a", activeforeground=TEXT)
-                elif char in ['MC', 'MR', 'M+', 'M-']:
-                    btn.configure(bg="#333333", fg="#FFD700", 
-                                activebackground="#444444", activeforeground="#FFD700")
+                btn = tk.Button(row_frame, text=char, 
+                              command=lambda ch=cmd, original=char: self.on_button(ch, original),
+                              font=self.display_font if char not in ['MC', 'MR', 'M+', 'M-'] else self.medium_font,
+                              bd=3, relief="raised", cursor="hand2",
+                              bg=self.get_button_color(char),
+                              fg=self.get_button_text_color(char),
+                              activebackground=self.get_button_active_color(char),
+                              activeforeground=TEXT)
                 
                 btn.pack(side="left", padx=3, expand=True, fill="both")
 
-        # Frame de histórico
+        # Frame de histórico (maior)
         history_frame = tk.Frame(self, bg=BG)
-        history_frame.pack(fill="x", padx=12, pady=(0,12))
+        history_frame.pack(fill="x", padx=15, pady=(0, 10))
         
-        history_label = tk.Label(history_frame, text="Histórico:", bg=BG, fg=NEON_CYAN, 
+        history_label = tk.Label(history_frame, text="HISTÓRICO:", bg=BG, fg=NEON_CYAN, 
                                 font=self.small_font)
         history_label.pack(anchor="w")
         
-        self.history_text = tk.Text(history_frame, height=2, bg=PANEL, fg=TEXT, 
-                                   font=self.history_font, wrap="word", state="disabled")
+        self.history_text = tk.Text(history_frame, height=2, bg="#222222", fg=TEXT, 
+                                   font=self.small_font, wrap="word", state="disabled")
         self.history_text.pack(fill="x", pady=(2,0))
 
-        # Bottom text
+        # Bottom text (maior)
         bottom = tk.Frame(self, bg=BG)
-        bottom.pack(fill="x", padx=12, pady=(0,12))
+        bottom.pack(fill="x", padx=15, pady=(0, 10))
         hint = tk.Label(bottom, 
-                       text="Enter para =  •  ESC limpa  •  Memória: M buttons", 
-                       bg=BG, fg="#9aa7a3", font=self.small_font)
+                       text="ENTER = Resultado  •  ESC = Limpar  •  MEM = M+ M- MR MC", 
+                       bg=BG, fg="#AAAAAA", font=self.small_font)
         hint.pack(side="left")
+
+    def get_button_color(self, char):
+        """Retorna cor do botão baseado no caractere"""
+        if char in "0123456789.":
+            return "#006600"  # verde escuro
+        elif char in "+-×÷%":
+            return "#000066"  # azul escuro
+        elif char in ['=', 'C', '←', '+/-']:
+            return "#660066"  # roxo escuro
+        elif char in ['MC', 'MR', 'M+', 'M-']:
+            return "#444444"  # cinza escuro
+        return "#333333"
+
+    def get_button_text_color(self, char):
+        """Retorna cor do texto do botão"""
+        if char in "0123456789.":
+            return NEON_GREEN
+        elif char in "+-×÷%":
+            return NEON_CYAN
+        elif char in ['=', 'C', '←', '+/-']:
+            return TEXT
+        elif char in ['MC', 'MR', 'M+', 'M-']:
+            return "#FFD700"  # dourado
+        return TEXT
+
+    def get_button_active_color(self, char):
+        """Retorna cor do botão quando ativo"""
+        if char in "0123456789.":
+            return "#008800"
+        elif char in "+-×÷%":
+            return "#000088"
+        elif char in ['=', 'C', '←', '+/-']:
+            return "#880088"
+        elif char in ['MC', 'MR', 'M+', 'M-']:
+            return "#666666"
+        return "#555555"
 
     def setup_keyboard_bindings(self):
         """Configura atalhos de teclado"""
@@ -250,78 +276,42 @@ class RickCalculator(tk.Tk):
         self.bind("<BackSpace>", lambda e: self.on_button("⌫"))
         self.bind("<Escape>", lambda e: self.on_button("C"))
         self.bind("<Delete>", lambda e: self.on_button("C"))
-        self.bind("<Control-c>", lambda e: self.on_button("C"))
         
         for k in "0123456789.":
             self.bind(k, lambda e, ch=k: self.on_button(ch))
         
-        # Operadores com e sem shift
+        # Operadores
         self.bind("+", lambda e: self.on_button("+"))
         self.bind("-", lambda e: self.on_button("-"))
         self.bind("*", lambda e: self.on_button("*"))
         self.bind("/", lambda e: self.on_button("/"))
         self.bind("%", lambda e: self.on_button("%"))
-        
-        # Bind para qualquer tecla (atualizar frase aleatoriamente)
-        self.bind("<Key>", self.on_keypress)
 
-    def on_keypress(self, event):
-        """Atualiza frase aleatoriamente ao digitar"""
-        if random.random() < 0.02:  # 2% de chance
-            self.quote_var.set(random.choice(RICK_QUOTES))
-
-    def validate_expression(self, expr):
-        """Valida a expressão antes de avaliar"""
-        if not expr or expr in "0":
-            return False
-        
-        # Verificar se há operadores consecutivos
-        if re.search(r'[+\-*/%]{2,}', expr):
-            return False
-        
-        # Verificar se termina com operador
-        if expr[-1] in '+-*/%':
-            return False
-        
-        return True
-
-    def add_to_history(self, expression, result):
-        """Adiciona ao histórico"""
-        self.history.append(f"{expression} = {result}")
-        if len(self.history) > 5:
-            self.history.pop(0)
-        
-        # Atualizar display do histórico
-        self.history_text.config(state="normal")
-        self.history_text.delete(1.0, tk.END)
-        for item in self.history:
-            self.history_text.insert(tk.END, item + "\n")
-        self.history_text.config(state="disabled")
-
-    def on_button(self, ch):
+    def on_button(self, ch, original=None):
+        """Manipula clique nos botões"""
         cur = self.display_var.get()
         
         # Tratamento dos botões de memória
-        if ch == "MC":  # Memory Clear
+        if ch == "MC":
             self.memory = 0
-            self.quote_var.set("Memória zerada, Morty!")
+            self.quote_var.set("Memória zerada!")
             return
-        elif ch == "MR":  # Memory Recall
+        elif ch == "MR":
             self.display_var.set(format_number(self.memory))
             return
-        elif ch == "M+":  # Memory Add
+        elif ch == "M+":
             try:
                 val = float(cur) if cur != "0" else 0
                 self.memory += val
-                self.quote_var.set(f"Memória: {format_number(self.memory)}")
+                self.quote_var.set(f"M: {format_number(self.memory)}")
             except ValueError:
                 pass
             return
-        elif ch == "M-":  # Memory Subtract
+        elif ch == "M-":
             try:
                 val = float(cur) if cur != "0" else 0
                 self.memory -= val
-                self.quote_var.set(f"Memória: {format_number(self.memory)}")
+                self.quote_var.set(f"M: {format_number(self.memory)}")
             except ValueError:
                 pass
             return
@@ -332,6 +322,7 @@ class RickCalculator(tk.Tk):
 
         if ch == "C":
             self.display_var.set("0")
+            self.quote_var.set(random.choice(RICK_QUOTES))
             return
             
         if ch == "⌫":
@@ -340,12 +331,14 @@ class RickCalculator(tk.Tk):
             return
             
         if ch == "=":
-            if not self.validate_expression(cur):
-                self.quote_var.set(random.choice(ERROR_QUOTES))
+            if not cur or cur == "0" or cur in "+-*/%":
+                self.quote_var.set("Digite algo, Morty!")
                 return
                 
             try:
                 expr = self.display_var.get()
+                # Converter × para * se necessário
+                expr = expr.replace('×', '*')
                 result = safe_eval(expr)
                 formatted_result = format_number(result)
                 self.display_var.set(formatted_result)
@@ -353,17 +346,18 @@ class RickCalculator(tk.Tk):
                 # Adicionar ao histórico
                 self.add_to_history(expr, formatted_result)
                 
-                # Frase aleatória
+                # Frase de sucesso
                 self.quote_var.set(random.choice([
-                    "Science, bitch!",
-                    "Boom! Big reveal!",
+                    "Boom!",
+                    "Science!",
+                    "Calculado!",
                     random.choice(RICK_QUOTES)
                 ]))
             except Exception as e:
-                self.display_var.set("Erro")
+                self.display_var.set("ERRO")
                 self.quote_var.set(random.choice(ERROR_QUOTES))
-                messagebox.showerror("Erro de Cálculo", 
-                                   f"Morty, isso não faz sentido!\n{str(e)}")
+                messagebox.showerror("Erro!", 
+                                   f"Deu ruim, Morty!\n{str(e)}")
             return
             
         if ch == "+/-":
@@ -377,20 +371,29 @@ class RickCalculator(tk.Tk):
             return
 
         # Para números e operadores
+        if ch in '0123456789.':
+            # Prevenir múltiplos pontos
+            if ch == '.':
+                last_number = re.split(r'[+\-*/%]', cur)[-1]
+                if '.' in last_number:
+                    return
+        
+        # Adicionar caractere
         new = cur + ch
-        
-        # Prevenir múltiplos pontos decimais no mesmo número
-        if ch == '.':
-            # Verificar se o último número já tem ponto
-            last_number = re.split(r'[+\-*/%]', new)[-1]
-            if last_number.count('.') > 1:
-                return
-        
-        # Prevenir operadores consecutivos
-        if ch in '+-*/%' and cur and cur[-1] in '+-*/%':
-            new = cur[:-1] + ch
-        
         self.display_var.set(new)
+
+    def add_to_history(self, expression, result):
+        """Adiciona ao histórico"""
+        self.history.append(f"{expression} = {result}")
+        if len(self.history) > 5:
+            self.history.pop(0)
+        
+        # Atualizar display do histórico
+        self.history_text.config(state="normal")
+        self.history_text.delete(1.0, tk.END)
+        for item in self.history:
+            self.history_text.insert(tk.END, item + "\n")
+        self.history_text.config(state="disabled")
 
 # ---------- Executa ----------
 if __name__ == "__main__":
